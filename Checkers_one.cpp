@@ -2,281 +2,231 @@
 #include <iostream>
 using namespace sf;
 
-#define SIZE_Board 8 //размер шашечных полей
-#define Black 4 //чёрная шашка
-#define White -4 //белая шашка
-#define Black_dam 5 //чёрная шашка
-#define White_dam -5 //белая шашка
+#define Size_board 8// Размер поля 8*8
+#define Black_dam 4 //Дамка чёрная
+#define White_dam -4 //Дамка белая
+#define Black_pawn 6 //Пешка чёрная
+#define White_pawn -6 //Пешка белая
 
-//структура для записи позиций
 struct poz
 {
 	int x, y;
-}oldPoz, regeleAlb, regeleNegru;
+}oldPoz;
 
 int  size = 100, move = 0, x, y;
-//Расположение шашек на доске, -4=белые, 4=чёрные
+
+//Массив расположения фигур на доске
 int board[8][8] =
-{ 0, 4, 0, 4, 0, 4, 0, 4,
-  4, 0, 4, 0, 4, 0, 4, 0,
-  0, 4, 0, 4, 0, 4, 0, 4,
+{ 0, 6, 0, 6, 0, 6, 0, 6,
+  6, 0, 6, 0, 6, 0, 6, 0,
+  0, 6, 0, 6, 0, 6, 0, 6,
   0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0,
- -4, 0,-4, 0, -4,0,-4, 0,
-  0,-4, 0,-4, 0,-4, 0,-4,
- -4, 0,-4, 0,-4, 0,-4, 0, };
+ -6, 0,-6, 0,-6, 0,-6, 0,
+  0,-6, 0,-6, 0,-6, 0,-6,
+ -6, 0,-6, 0,-6, 0,-6, 0, };
 
-int turnAlbDreapta = 0;
-int  moveWB= 0; // 0 белые, 1 чёрные
-int sahAlb = 0, sahNegru = 0;
+int regeAlb = 0, regeNegru = 0, flag = 0; // flag - 0 белые, 1 чёрные
 
-//Белая шашка, по сути практически дамка
-int White_A(int ox, int oy, int nx, int ny)
+//Белая дамка
+int White_dam_move(int ox, int oy, int nx, int ny)
 {
+	//Левый верхний
 	int j = ox - 1;
 	for (int i = oy - 1; i >= 0; i--)
 	{
-		if (board[i][j] >= 0 && (ny == i && nx == j))
-		{
-			return 1;
-		}
-		else if (board[i][j] != 0)
-		{
-			break;
-		}
+		if (board[i][j] >= 0 && (ny == i && nx == j)) return 1;
+		else if (board[i][j] != 0) break;
 		j--;
 	}
+
+	// Правый верхний
 	j = ox + 1;
 	for (int i = oy - 1; i >= 0; i--)
 	{
-		if (board[i][j] >= 0 && (ny == i && nx == j))
-		{
-			return 1;
-		}
-		else if (board[i][j] != 0)
-		{
-			break;
-		}
+		if (board[i][j] >= 0 && (ny == i && nx == j)) return 1;
+		else if (board[i][j] != 0) break;
 		j++;
 	}
-	return 0;
-}
 
-//Чёрная шашка, по сути практически дамка
-int Black_N(int ox, int oy, int nx, int ny)
-{
-	int j = ox - 1;
-
+	// Левый нижний
 	j = ox - 1;
 	for (int i = oy + 1; i <= 7; i++)
 	{
-		if (board[i][j] <= 0 && (ny == i && nx == j))
-		{
-			return 1;
-		}
-		else if (board[i][j] != 0)
-		{
-			break;
-		}
+		if (board[i][j] >= 0 && (ny == i && nx == j)) return 1;
+		else if (board[i][j] != 0) break;
 		j--;
 	}
+
+	// Правый нижний
 	j = ox + 1;
 	for (int i = oy + 1; i <= 7; i++)
 	{
-		if (board[i][j] <= 0 && (ny == i && nx == j))
-		{
-			return 1;
-		}
-		else if (board[i][j] != 0)
-		{
-			break;
-		}
+		if (board[i][j] >= 0 && (ny == i && nx == j)) return 1;
+		else if (board[i][j] != 0) break;
 		j++;
 	}
 	return 0;
 }
 
-int NebunASah(int ox, int oy, int regex, int regey)
+//Чёрная дамка
+int Black_dam_move(int ox, int oy, int nx, int ny)
 {
+	//Левый верхний
 	int j = ox - 1;
 	for (int i = oy - 1; i >= 0; i--)
 	{
-		if (board[i][j] >= 0 && (regey == i && regex == j))
-		{
-			return 1;
-		}
-		else if (board[i][j] != 0)
-		{
-			break;
-		}
+		if (board[i][j] <= 0 && (ny == i && nx == j)) return 1;
+		else if (board[i][j] != 0) break;
 		j--;
 	}
+
+	// Правый верхний
 	j = ox + 1;
 	for (int i = oy - 1; i >= 0; i--)
 	{
-		if (board[i][j] >= 0 && (regey == i && regex == j))
-		{
-			return 1;
-		}
-		else if (board[i][j] != 0)
-		{
-			break;
-		}
+		if (board[i][j] <= 0 && (ny == i && nx == j)) return 1;
+		else if (board[i][j] != 0) break;
+		j++;
+	}
+
+	// Левый нижний
+	j = ox - 1;
+	for (int i = oy + 1; i <= 7; i++)
+	{
+		if (board[i][j] <= 0 && (ny == i && nx == j)) return 1;
+		else if (board[i][j] != 0) break;
+		j--;
+	}
+
+	// Правый нижний
+	j = ox + 1;
+	for (int i = oy + 1; i <= 7; i++)
+	{
+		if (board[i][j] <= 0 && (ny == i && nx == j))  return 1;
+		else if (board[i][j] != 0) break;
 		j++;
 	}
 	return 0;
 }
 
-int NebunNSah(int ox, int oy, int regex, int regey)
+//Чёрные шашки(как ходят)
+int Black_pawn_m(int ox, int oy, int nx, int ny)
 {
-	int j = ox - 1;
-	for (int i = oy - 1; i >= 0; i--)
-	{
-		if (board[i][j] <= 0 && (regey == i && regex == j))
-		{
-			return 1;
-		}
-		else if (board[i][j] != 0)
-		{
-			break;
-		}
-		j--;
-	}
-	j = ox + 1;
-	for (int i = oy - 1; i >= 0; i--)
-	{
-		if (board[i][j] <= 0 && (regey == i && regex == j))
-		{
-			return 1;
-		}
-		else if (board[i][j] != 0)
-		{
-			break;
-		}
-		j++;
-	}
+	// Нижний правый
+	if (ox + 1 < Size_board && oy + 1 < Size_board &&
+		ny == oy + 1 && nx == ox + 1 && board[ny][nx] <= 0) return 1;
+
+	// Нижний левый
+	if (ox - 1 >= 0 && oy + 1 < Size_board &&
+		nx == ox - 1 && ny == oy + 1 && board[ny][nx] <= 0) return 1;
+
 	return 0;
 }
 
-int RegeNegruSahCheck(int posRegex, int posRegey)
+//Белые шашки(как ходят)
+int White_pawn_m(int ox, int oy, int nx, int ny)
 {
-	int ok = 0;
-	for (int i = 0; i < SIZE_Board; i++)
-	{
-		for (int j = 0; j < SIZE_Board; j++)
-		{
-			if (board[i][j] < 0)
-			{
-				if (board[i][j] == White)
-				{
-					ok = NebunASah(j, i, posRegex, posRegey);
-				}
-				if (ok == 1)
-				{
-					return 0;
-				}
-			}
-		}
-	}
-	return 1;
-}
+	//Битьё шашки(тестовый вариант, пока не работает так как надо )
+	if (oy - 1 >= 0 && ox + 1 < Size_board && nx == ox + 1 &&
+		ny == oy - 1 && board[ny][nx] >= 0 && board[oy - 1][ox + 1] >= 4) {
+		board[oy][ox] = 0;
+		board[oy - 1][ox + 1] = 0;
+		board[oy - 2][ox + 2] = -6;
 
-void pozRegeAlb()
-{
-	for (int i = 0; i < SIZE_Board; i++)
-	{
-		for (int j = 0; j < SIZE_Board; j++)
-		{
-			if (board[i][j] == 6)
-			{
-				regeleAlb.x = j;
-				regeleAlb.y = i;
-				break;
-			}
-		}
-	}
-}
+		return 1;
+	};
 
-void pozRegeNegru()
-{
-	for (int i = 0; i < SIZE_Board; i++)
-	{
-		for (int j = 0; j < SIZE_Board; j++)
-		{
-			if (board[i][j] == 6)
-			{
-				regeleNegru.y = i;
-				regeleNegru.x = j;
-				break;
-			}
-		}
-	}
+	// Верхний левый
+	if (ox - 1 >= 0 && oy - 1 >= 0 && ny == oy - 1 &&
+		nx == ox - 1 && board[ny][nx] >= 0) return 1;
+
+	// Верхний правый
+	if (oy - 1 >= 0 && ox + 1 < Size_board && nx == ox + 1 &&
+		ny == oy - 1 && board[ny][nx] >= 0) return 1;
+
+	return 0;
+
 }
 
 int main()
 {
-	RenderWindow window(VideoMode(800, 800), L"Шашки", sf::Style::Close | sf::Style::Titlebar);//Размер,название,запрет возможности изменять размер окна
-	
+	RenderWindow window(VideoMode(800, 800),
+		L"Шашки", sf::Style::Close | sf::Style::Titlebar);
+
 	//Иконка окна
 	Image icon;
-	if (!icon.loadFromFile("images/icon.png"))
-	{
-		return 1;
-	}
+	if (!icon.loadFromFile("images/icon.png")) return 1;
 	window.setIcon(512, 512, icon.getPixelsPtr());
 
 	Texture t1, t2, t3, t4, t5;
-	t1.loadFromFile("images/Board.png");//Доска(поля)
-	t2.loadFromFile("images/Black_1.png");//Чёрная шашка
-	t3.loadFromFile("images/White_3.png");//Белая шашка
-	t4.loadFromFile("images/Black_damka.png");//Чёрная шашка
-	t5.loadFromFile("images/White_damka_bl.png");//Белая шашка
 
-	//Геометрические фигуры с нанесенной поверх нее текстурой
-	Sprite Board_spr(t1);//спрайт доски
-	Sprite Black_p_spr(t2);//спрайт чёрной шашки
-	Sprite White_p_spr(t3);//спрайт белой шашки
-	Sprite Black_damka_spr(t4);//спрайт чёрной дамки
-	Sprite White_damka_spr(t5);//спрайт белой дамки
-	Sprite Mutare;
+	//Добавления изображения(доска, шашки)
+	t1.loadFromFile("images/board.png");
+	t2.loadFromFile("images/Black_damka.png");
+	t3.loadFromFile("images/White_damka_bl.png");
+	t4.loadFromFile("images/Black_1.png");
+	t5.loadFromFile("images/White_1.png");
+
+	Sprite tabla(t1);// спрайт доски
+	Sprite Black_dam_spr(t2);// Спрайт чёрной дамки
+	Sprite White_dam_spr(t3);//Спрайт белой дамки
+	Sprite Black_pawn_spr(t4);//Спрайт чёрной пешки
+	Sprite White_pawn_spr(t5);//Спрайт белой пешки
+	Sprite Flag;
 
 	float dx = 0, dy = 0;
-	int num_h = 0;
+	int num_figure = 0;
 
 	while (window.isOpen())
 	{
-		//Запись координат мыши в окне по x и y
 		Vector2i pos = Mouse::getPosition(window);
 		x = pos.x / size;
 		y = pos.y / size;
+
 		Event e;
 		while (window.pollEvent(e))
 		{
-			if (e.type == Event::Closed)
-			{
-				window.close();
-			}
+			if (e.type == Event::Closed) window.close();
+
 			window.clear();
 			if (e.type == Event::MouseButtonPressed)
 			{
 				if (e.key.code == Mouse::Left)
 				{
-
 					if (board[y][x] != 0)
 					{
 						dx = pos.x - x * 100;
 						dy = pos.y - y * 100;
-						if (board[y][x] == Black && moveWB == 1)
+
+						if (board[y][x] == Black_dam && flag == 1)
 						{
-							num_h = Black;
-							Mutare = Black_p_spr;
+							num_figure = Black_dam;
+							Flag = Black_dam_spr;
 							board[y][x] = 0;
 						}
-						if (board[y][x] == White && moveWB == 0)
+						if (board[y][x] == White_dam && flag == 0)
 						{
-							num_h = White;
-							Mutare = White_p_spr;
+							num_figure = White_dam;
+							Flag = White_dam_spr;
 							board[y][x] = 0;
+						}
+						if (board[y][x] == Black_pawn && flag == 1)
+						{
+							num_figure = Black_pawn;
+							Flag = Black_pawn_spr;
+							board[y][x] = 0;
+
+						}
+						if (board[y][x] == White_pawn && flag == 0)
+						{
+							num_figure = White_pawn;
+							Flag = White_pawn_spr;
+
+
+
+							board[y][x] = 0;
+
 						}
 						if (board[y][x] == 0)
 						{
@@ -289,115 +239,89 @@ int main()
 			}
 			if (e.type == Event::MouseButtonReleased)
 			{
-				if (e.key.code == Mouse::Left)
+				if (e.key.code == Mouse::Left)//обработка события - нажатие ЛКМ 
 				{
 					int ok = 2;
 
-					if (num_h == White && move == 1)
+					if (num_figure == White_dam && move == 1)
 					{
-						ok = White_A(oldPoz.x, oldPoz.y, x, y);
+						ok = White_dam_move(oldPoz.x, oldPoz.y, x, y);
 					}
-					if (num_h == Black && move == 1)
+					if (num_figure == Black_dam && move == 1)
 					{
-						ok = Black_N(oldPoz.x, oldPoz.y, x, y);
+						ok = Black_dam_move(oldPoz.x, oldPoz.y, x, y);
 					}
+					if (num_figure == Black_pawn && move == 1)
+					{
+						ok = Black_pawn_m(oldPoz.x, oldPoz.y, x, y);
+						if (ok == 1 && regeNegru == 0) regeNegru = 1;
 
+					}
+					if (num_figure == White_pawn && move == 1)
+					{
+						ok = White_pawn_m(oldPoz.x, oldPoz.y, x, y);
+						if (ok == 1 && regeAlb == 0) regeAlb = 1;
+
+
+					}
 					if (ok == 1)
 					{
-						int nr = board[y][x];
-						board[y][x] = num_h;
-						if (moveWB == 0)
-						{
-							if (sahAlb == 1)
-							{
-								pozRegeAlb();
-								sahAlb = 0;
-								pozRegeNegru();
-								int sah = RegeNegruSahCheck(regeleNegru.x, regeleNegru.y);
-								if (sah == 0)
-								{
-									sahNegru = 1;
-								}
-								moveWB = 1;
-							}
-							else
-							{
-								pozRegeAlb();
-								pozRegeNegru();
-								int sah = RegeNegruSahCheck(regeleNegru.x, regeleNegru.y);
-								if (sah == 0)
-								{
-									sahNegru = 1;
-								}
-								moveWB = 1;
+						//Если пешки дойдут до конца поля они превращаются в дамки
+						board[y][x] = num_figure;
+						if (y == 0 && num_figure == White_pawn) board[y][x] = White_dam;
+						if (y == 7 && num_figure == Black_pawn) board[y][x] = Black_dam;
 
-							}
-						}
-						else
-						{
-							if (sahNegru == 1)
-							{
-								pozRegeNegru();
-								int s = RegeNegruSahCheck(regeleNegru.x, regeleNegru.y);
-								if (s == 0)
-								{
-									board[oldPoz.y][oldPoz.x] = num_h;
-									board[y][x] = nr;
-								}
-								else
-								{
-									sahNegru = 0;
-									moveWB = 0;
-								}
-							}
-							else
-							{
-								pozRegeNegru();
-								int sa = RegeNegruSahCheck(regeleNegru.x, regeleNegru.y);
-								if (sa == 0)
-								{
-									board[oldPoz.y][oldPoz.x] = num_h;
-									board[y][x] = nr;
-								}
-								else
-								{
-									moveWB = 0;
-								}
-							}
-						}
+						//Условный оператор для перехода хода
+						if (flag == 0) flag = 1;
+						else flag = 0;
 					}
 					else if (ok == 0)
 					{
-						board[oldPoz.y][oldPoz.x] = num_h;
+						board[oldPoz.y][oldPoz.x] = num_figure;
 					}
 					move = 0;
 				}
 			}
 		}
-		
-		window.clear();//очистка окна
-		window.draw(Board_spr);//рисуем доску
+
+		window.clear();//очистка
+		window.draw(tabla);//добаялем доску
+
 		if (move == 1)
 		{
-			Mutare.setPosition(pos.x - dx, pos.y - dy);
-			window.draw(Mutare);
+			Flag.setPosition(pos.x - dx, pos.y - dy);
+			window.draw(Flag);
 		}
-		for (int i = 0; i < SIZE_Board; i++)
+		//Добавляем шашки на доску 
+		for (int i = 0; i < Size_board; i++)
 		{
-			for (int j = 0; j < SIZE_Board; j++)
+			for (int j = 0; j < Size_board; j++)
 			{
-
 				if (board[i][j] != 0)
 				{
-					if (board[i][j] == Black)
+					//Добавляем чёрную дамку
+					if (board[i][j] == Black_dam)
 					{
-						Black_p_spr.setPosition(j * size, i * size);
-						window.draw(Black_p_spr);
+						Black_dam_spr.setPosition(j * size, i * size);
+						window.draw(Black_dam_spr);
 					}
-					if (board[i][j] == White)
+					//Добавляем белую дамку
+					if (board[i][j] == White_dam)
 					{
-						White_p_spr.setPosition(j * size, i * size);
-						window.draw(White_p_spr);
+						White_dam_spr.setPosition(j * size, i * size);
+						window.draw(White_dam_spr);
+					}
+					//Добавляем чёрную пешку
+					if (board[i][j] == Black_pawn)
+					{
+						Black_pawn_spr.setPosition(j * size, i * size);
+						window.draw(Black_pawn_spr);
+					}
+					//Добавляем белую пешку
+					if (board[i][j] == White_pawn)
+					{
+						White_pawn_spr.setPosition(j * size, i * size);
+						window.draw(White_pawn_spr);
 					}
 				}
 			}
