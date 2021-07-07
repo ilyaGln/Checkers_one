@@ -14,6 +14,8 @@ struct poz
 }oldPoz;
 
 int  size = 100, move = 0, x, y;
+int regeAlb = 0, regeNegru = 0, flag = 0; // flag - 0 белые, 1 чёрные
+int pawn_hit, pawn_w, pawn_b, help_p;
 
 //Массив расположения фигур на доске
 int board[8][8] =
@@ -25,8 +27,6 @@ int board[8][8] =
  -6, 0,-6, 0,-6, 0,-6, 0,
   0,-6, 0,-6, 0,-6, 0,-6,
  -6, 0,-6, 0,-6, 0,-6, 0, };
-
-int regeAlb = 0, regeNegru = 0, flag = 0; // flag - 0 белые, 1 чёрные
 
 //Белая дамка
 int White_dam_move(int ox, int oy, int nx, int ny)
@@ -110,16 +110,75 @@ int Black_dam_move(int ox, int oy, int nx, int ny)
 	return 0;
 }
 
+//Битьё шашки
+int Hit_the_checker(int ox, int oy, int nx, int ny, int check) {
+	
+	//Чёрная ищем белую шашку
+	if (check == 0) {
+		pawn_w = -4;
+		pawn_b = 10;//откат флага
+	}
+	else {//Белая, ищем чёрную шашку
+		pawn_w = -10;
+		pawn_b = 4;//откат флага
+	}
+
+	//Битьё шашки влево вниз
+	if (oy + 1 >= 0 && ox + 1 < Size_board && nx == ox - 2 &&
+		ny == oy + 2 && (board[oy + 1][ox - 1] <= pawn_w ||
+			board[oy + 1][ox - 1] >= pawn_b) && board[oy + 2][ox - 2] == 0) {
+
+		board[oy + 1][ox - 1] = 0;
+		return 1;
+	}
+
+	//Битьё шашки вправо вниз
+	if (oy + 1 >= 0 && ox + 1 < Size_board && nx == ox + 2 &&
+		ny == oy + 2 && (board[oy + 1][ox + 1] <= pawn_w ||
+			board[oy + 1][ox + 1] >= pawn_b) && board[oy + 2][ox + 2] == 0) {
+
+		board[oy + 1][ox + 1] = 0;
+		return 1;
+	}
+
+	//Битьё шашки вправо вверх
+	if (oy - 1 >= 0 && ox + 1 < Size_board && nx == ox + 2 &&
+		ny == oy - 2 && (board[oy - 1][ox + 1] <= pawn_w ||
+			board[oy - 1][ox + 1] >= pawn_b) && board[oy - 2][ox + 2] == 0) {
+
+		board[oy - 1][ox + 1] = 0;
+		return 1;
+	}
+
+	//Битьё шашки влево вверх
+	if (oy - 1 >= 0 && ox - 1 < Size_board && nx == ox - 2 &&
+		ny == oy - 2  && (board[oy - 1][ox - 1] <= pawn_w ||
+			board[oy - 1][ox - 1] >= pawn_b) && board[oy - 2][ox - 2] == 0) {
+
+		board[oy - 1][ox - 1] = 0;
+		return 1;
+	}
+	return 0;
+
+}
+
 //Чёрные шашки(как ходят)
 int Black_pawn_m(int ox, int oy, int nx, int ny)
 {
-	// Нижний правый
-	if (ox + 1 < Size_board && oy + 1 < Size_board &&
-		ny == oy + 1 && nx == ox + 1 && board[ny][nx] <= 0) return 1;
+	//Битьё шашки
+	pawn_hit = 0;
+	if (Hit_the_checker(ox, oy, nx, ny, pawn_hit) == 1) {
+		return 1;
+	}
+	else {
+		// Нижний правый(ход)
+		if (ox + 1 < Size_board && oy + 1 < Size_board &&
+			ny == oy + 1 && nx == ox + 1 && board[ny][nx] == 0) return 1;
 
-	// Нижний левый
-	if (ox - 1 >= 0 && oy + 1 < Size_board &&
-		nx == ox - 1 && ny == oy + 1 && board[ny][nx] <= 0) return 1;
+		// Нижний левый(ход)
+		if (ox - 1 >= 0 && oy + 1 < Size_board &&
+			nx == ox - 1 && ny == oy + 1 && board[ny][nx] == 0) return 1;
+	}
 
 	return 0;
 }
@@ -127,26 +186,22 @@ int Black_pawn_m(int ox, int oy, int nx, int ny)
 //Белые шашки(как ходят)
 int White_pawn_m(int ox, int oy, int nx, int ny)
 {
-	//Битьё шашки(тестовый вариант, пока не работает так как надо )
-	if (oy - 1 >= 0 && ox + 1 < Size_board && nx == ox + 1 &&
-		ny == oy - 1 && board[ny][nx] >= 0 && board[oy - 1][ox + 1] >= 4) {
-		board[oy][ox] = 0;
-		board[oy - 1][ox + 1] = 0;
-		board[oy - 2][ox + 2] = -6;
-
+	//Битьё шашки
+	pawn_hit = 1;
+	if (Hit_the_checker(ox, oy, nx, ny, pawn_hit) == 1) {
 		return 1;
-	};
+	}
+	else {
+		// Верхний левый (ход)
+		if (ox - 1 >= 0 && oy - 1 >= 0 && ny == oy - 1 &&
+			nx == ox - 1 && board[ny][nx] == 0) return 1;
 
-	// Верхний левый
-	if (ox - 1 >= 0 && oy - 1 >= 0 && ny == oy - 1 &&
-		nx == ox - 1 && board[ny][nx] >= 0) return 1;
+		// Верхний правый(ход)
+		if (oy - 1 >= 0 && ox + 1 < Size_board && nx == ox + 1 &&
+			ny == oy - 1 && board[ny][nx] == 0) return 1;
 
-	// Верхний правый
-	if (oy - 1 >= 0 && ox + 1 < Size_board && nx == ox + 1 &&
-		ny == oy - 1 && board[ny][nx] >= 0) return 1;
-
-	return 0;
-
+		return 0;
+	}
 }
 
 int main()
@@ -223,8 +278,6 @@ int main()
 							num_figure = White_pawn;
 							Flag = White_pawn_spr;
 
-
-
 							board[y][x] = 0;
 
 						}
@@ -255,14 +308,11 @@ int main()
 					{
 						ok = Black_pawn_m(oldPoz.x, oldPoz.y, x, y);
 						if (ok == 1 && regeNegru == 0) regeNegru = 1;
-
 					}
 					if (num_figure == White_pawn && move == 1)
 					{
 						ok = White_pawn_m(oldPoz.x, oldPoz.y, x, y);
 						if (ok == 1 && regeAlb == 0) regeAlb = 1;
-
-
 					}
 					if (ok == 1)
 					{
@@ -320,8 +370,10 @@ int main()
 					//Добавляем белую пешку
 					if (board[i][j] == White_pawn)
 					{
-						White_pawn_spr.setPosition(j * size, i * size);
+
+						White_pawn_spr.setPosition(j* size, i* size);
 						window.draw(White_pawn_spr);
+												
 					}
 				}
 			}
