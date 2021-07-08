@@ -16,6 +16,7 @@ struct poz
 int  size = 100, move = 0, x, y;
 int regeAlb = 0, regeNegru = 0, flag = 0; // flag - 0 белые, 1 чёрные
 int pawn_hit, pawn_w, pawn_b, help_p;
+int counter_wh = 0, counter_bl = 0;
 
 //Массив расположения фигур на доске
 int board[8][8] =
@@ -24,7 +25,7 @@ int board[8][8] =
   0, 6, 0, 6, 0, 6, 0, 6,
   0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0,
- -6, 0,-6, 0,-6, 0,-6, 0,
+ -6, 0,-6, 0,-4, 0,-6, 0,
   0,-6, 0,-6, 0,-6, 0,-6,
  -6, 0,-6, 0,-6, 0,-6, 0, };
 
@@ -35,7 +36,10 @@ int White_dam_move(int ox, int oy, int nx, int ny)
 	int j = ox - 1;
 	for (int i = oy - 1; i >= 0; i--)
 	{
-		if (board[i][j] >= 0 && (ny == i && nx == j)) return 1;
+		if (board[i][j] >= 0 && (ny >= i-1 && nx >= j-1)) {
+			board[i][j] = 0;
+			return 1;
+		}
 		else if (board[i][j] != 0) break;
 		j--;
 	}
@@ -44,7 +48,10 @@ int White_dam_move(int ox, int oy, int nx, int ny)
 	j = ox + 1;
 	for (int i = oy - 1; i >= 0; i--)
 	{
-		if (board[i][j] >= 0 && (ny == i && nx == j)) return 1;
+		if (board[i][j] >= 0 && (ny >= i + 1 && nx >= j - 1)) {
+			board[i][j] = 0;
+			return 1;
+		}
 		else if (board[i][j] != 0) break;
 		j++;
 	}
@@ -53,7 +60,11 @@ int White_dam_move(int ox, int oy, int nx, int ny)
 	j = ox - 1;
 	for (int i = oy + 1; i <= 7; i++)
 	{
-		if (board[i][j] >= 0 && (ny == i && nx == j)) return 1;
+		if (board[i][j] >= 0 && (ny >= i && nx >= j)) { 
+			board[i][j] = 0;
+			return 1; 
+		}
+
 		else if (board[i][j] != 0) break;
 		j--;
 	}
@@ -122,9 +133,9 @@ int Hit_the_checker(int ox, int oy, int nx, int ny, int check) {
 		pawn_w = -10;
 		pawn_b = 4;//откат флага
 	}
-
+	
 	//Битьё шашки влево вниз
-	if (oy + 1 >= 0 && ox + 1 < Size_board && nx == ox - 2 &&
+	if (oy + 1 >= 0 && ox - 1 < Size_board && nx == ox - 2 &&
 		ny == oy + 2 && (board[oy + 1][ox - 1] <= pawn_w ||
 			board[oy + 1][ox - 1] >= pawn_b) && board[oy + 2][ox - 2] == 0) {
 
@@ -186,9 +197,12 @@ int Black_pawn_m(int ox, int oy, int nx, int ny)
 //Белые шашки(как ходят)
 int White_pawn_m(int ox, int oy, int nx, int ny)
 {
+
 	//Битьё шашки
 	pawn_hit = 1;
+	
 	if (Hit_the_checker(ox, oy, nx, ny, pawn_hit) == 1) {
+	
 		return 1;
 	}
 	else {
@@ -254,18 +268,21 @@ int main()
 						dx = pos.x - x * 100;
 						dy = pos.y - y * 100;
 
+						//Чёрная дамка
 						if (board[y][x] == Black_dam && flag == 1)
 						{
 							num_figure = Black_dam;
 							Flag = Black_dam_spr;
 							board[y][x] = 0;
 						}
+						//Белая дамка
 						if (board[y][x] == White_dam && flag == 0)
 						{
 							num_figure = White_dam;
 							Flag = White_dam_spr;
 							board[y][x] = 0;
 						}
+						//Чёрная шашка
 						if (board[y][x] == Black_pawn && flag == 1)
 						{
 							num_figure = Black_pawn;
@@ -273,13 +290,12 @@ int main()
 							board[y][x] = 0;
 
 						}
+						//Чёрная шашка
 						if (board[y][x] == White_pawn && flag == 0)
 						{
 							num_figure = White_pawn;
 							Flag = White_pawn_spr;
-
 							board[y][x] = 0;
-
 						}
 						if (board[y][x] == 0)
 						{
@@ -295,7 +311,6 @@ int main()
 				if (e.key.code == Mouse::Left)//обработка события - нажатие ЛКМ 
 				{
 					int ok = 2;
-
 					if (num_figure == White_dam && move == 1)
 					{
 						ok = White_dam_move(oldPoz.x, oldPoz.y, x, y);
@@ -321,9 +336,61 @@ int main()
 						if (y == 0 && num_figure == White_pawn) board[y][x] = White_dam;
 						if (y == 7 && num_figure == Black_pawn) board[y][x] = Black_dam;
 
-						//Условный оператор для перехода хода
 						if (flag == 0) flag = 1;
 						else flag = 0;
+						/*if (board[y + 1][x - 1] == 0 || board[y + 1][x + 1] == 0 || board[y - 1][x - 1] == 0 || board[y - 1][x + 1] == 0)
+						{
+							//White_pawn_m(oldPoz.x, oldPoz.y, x, y);
+							if (flag == 0) flag = 1;
+							else flag = 0;
+						}*/
+						//y + 2 < Size_board && x - 2 >= 0 || y + 2 < Size_board && x + 2 < Size_board || y - 2 >= 0 && x - 2 >= 0 || y - 2 >= 0 && x + 2 < Size_board
+						/*if (flag = 1) {
+							if (y + 2 < Size_board && x - 2 >= 0 || y + 2 < Size_board && x + 2 < Size_board || y - 2 >= 0 && x - 2 >= 0 || y - 2 >= 0 && x + 2 < Size_board) {
+								if (board[y + 1][x - 1] <= -4 && board[y + 2][x - 2] == 0 ||
+									board[y + 1][x + 1] <= -4 && board[y + 2][x + 2] == 0 ||
+									board[y - 1][x - 1] <= -4 && board[y - 2][x - 2] == 0 ||
+									board[y - 1][x + 1] <= -4 && board[y - 2][x + 2] == 0)
+								{
+									flag = 1;
+								}
+							}
+							else flag = 0;
+						}
+						if (flag = 0) {
+							if (y + 2 < Size_board && x - 2 >= 0 || y + 2 < Size_board && x + 2 < Size_board || y - 2 >= 0 && x - 2 >= 0 || y - 2 >= 0 && x + 2 < Size_board) {
+								if (board[y + 1][x - 1] >= 4 && board[y + 2][x - 2] == 0 ||
+									board[y + 1][x + 1] >= 4 && board[y + 2][x + 2] == 0 ||
+									board[y - 1][x - 1] >= 4 && board[y - 2][x - 2] == 0 ||
+									board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0)
+								{
+									flag = 0;
+								}
+							}
+							else flag = 1;
+
+
+						}
+						*/
+						/*
+						if (board[y + 1][x - 1] >= 4 && board[y + 2][x - 2] == 0 ||
+							board[y + 1][x + 1] >= 4 && board[y + 2][x + 2] == 0 ||
+							board[y - 1][x - 1] >= 4 && board[y - 2][x - 2] == 0 ||
+							board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0)
+						{
+							flag = 0;
+						}
+						*/
+						//Условный оператор для перехода хода
+						
+						if ((board[y + 1][x - 1] >= 4 || board[y - 1][x - 1] >= 4 ||
+							board[y + 1][x + 1] >= 4 || board[y + 1][x + 1] >= 4)&&
+							((board[y + 2][x + 2] == 0) || (board[y - 2][x + 2] == 0)||
+								(board[y - 2][x - 2] == 0)|| (board[y + 2][x - 2] == 0)))
+						{
+							flag = 0;
+						}
+						
 					}
 					else if (ok == 0)
 					{
@@ -347,6 +414,7 @@ int main()
 		{
 			for (int j = 0; j < Size_board; j++)
 			{
+				
 				if (board[i][j] != 0)
 				{
 					//Добавляем чёрную дамку
@@ -370,15 +438,15 @@ int main()
 					//Добавляем белую пешку
 					if (board[i][j] == White_pawn)
 					{
-
 						White_pawn_spr.setPosition(j* size, i* size);
-						window.draw(White_pawn_spr);
-												
+						window.draw(White_pawn_spr);							
 					}
 				}
 			}
 		}
+			
 		window.display();
 	}
+	
 	return 0;
 }
