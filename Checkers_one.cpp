@@ -73,7 +73,10 @@ int White_dam_move(int ox, int oy, int nx, int ny)
 	j = ox + 1;
 	for (int i = oy + 1; i <= 7; i++)
 	{
-		if (board[i][j] >= 0 && (ny == i && nx == j)) return 1;
+		if (board[i][j] >= 0 && (ny == i && nx == j)) {
+			board[i][j] = 0;
+			return 1; 
+		}
 		else if (board[i][j] != 0) break;
 		j++;
 	}
@@ -138,8 +141,14 @@ int Hit_the_checker(int ox, int oy, int nx, int ny, int check) {
 	if (oy + 1 >= 0 && ox - 1 < Size_board && nx == ox - 2 &&
 		ny == oy + 2 && (board[oy + 1][ox - 1] <= pawn_w ||
 			board[oy + 1][ox - 1] >= pawn_b) && board[oy + 2][ox - 2] == 0) {
-
+	
 		board[oy + 1][ox - 1] = 0;
+		/*
+		if ((oy-1 >= 0 && ox-1>=0 && oy-1 board[oy-1][ox-1]>=4 && board[oy - 2][ox - 2] == 0 &&) {
+
+
+		}
+		*/
 		return 1;
 	}
 
@@ -217,7 +226,7 @@ int White_pawn_m(int ox, int oy, int nx, int ny)
 		return 0;
 	}
 }
-
+int oldFlag = 0;
 int main()
 {
 	RenderWindow window(VideoMode(800, 800),
@@ -336,8 +345,7 @@ int main()
 						if (y == 0 && num_figure == White_pawn) board[y][x] = White_dam;
 						if (y == 7 && num_figure == Black_pawn) board[y][x] = Black_dam;
 
-						if (flag == 0) flag = 1;
-						else flag = 0;
+					
 						/*if (board[y + 1][x - 1] == 0 || board[y + 1][x + 1] == 0 || board[y - 1][x - 1] == 0 || board[y - 1][x + 1] == 0)
 						{
 							//White_pawn_m(oldPoz.x, oldPoz.y, x, y);
@@ -382,14 +390,121 @@ int main()
 						}
 						*/
 						//Условный оператор для перехода хода
-						
+						/*
 						if ((board[y + 1][x - 1] >= 4 || board[y - 1][x - 1] >= 4 ||
 							board[y + 1][x + 1] >= 4 || board[y + 1][x + 1] >= 4)&&
 							((board[y + 2][x + 2] == 0) || (board[y - 2][x + 2] == 0)||
 								(board[y - 2][x - 2] == 0)|| (board[y + 2][x - 2] == 0)))
 						{
 							flag = 0;
+						}*/
+						
+
+
+						if (flag == 0) { oldFlag = 0; flag = 1; }
+						else { oldFlag = 1; flag = 0; }
+						/*
+						if (x > 1 && x<6) {
+							if ((board[y + 1][x - 1] >= 4 && board[y + 2][x - 2] == 0) ||
+								(board[y + 1][x + 1] >= 4 && board[y + 2][x + 2] == 0) ||
+								(board[y - 1][x - 1] >= 4 && board[y - 2][x - 2] == 0) ||
+								(board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0))
+							{
+								flag = 0;
+							}
 						}
+						else if (oldFlag==1 && flag==0 && x == 1 && board[y-1][x+1]>=4 && board[y - 2][x + 2] == 0) {
+							if ((board[y + 1][x - 1] >= 4 && board[y + 2][x - 2] == 0) ||
+								(board[y + 1][x + 1] >= 4 && board[y + 2][x + 2] == 0) ||
+								(board[y - 1][x - 1] >= 4 && board[y - 2][x - 2] == 0) ||
+								(board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0))
+							{
+								flag = 0;
+							}
+						}
+						else if (oldFlag == 0 && board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0) {
+							if ((board[y + 1][x - 1] >= 4 && board[y + 2][x - 2] == 0) ||
+								(board[y + 1][x + 1] >= 4 && board[y + 2][x + 2] == 0) ||
+								(board[y - 1][x - 1] >= 4 && board[y - 2][x - 2] == 0) ||
+								(board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0))
+							{
+								flag = 0;
+							}
+						}
+
+
+						//////////////////////////////////////
+
+							if (((board[y + 1][x - 1] >= 4) && (board[y + 2][x - 2] == 0)) ||
+								((board[y + 1][x + 1] >= 4 && board[y + 2][x + 2] == 0))||
+								((board[y - 1][x - 1] >= 4 && board[y - 2][x - 2] == 0))||
+								((board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0)))
+							{
+								flag = 0;
+							}
+						*/
+						
+						if (x > 1 && x < 6) {
+							if ((board[y + 1][x - 1] >= 4 && board[y + 2][x - 2] == 0) ||
+								(board[y + 1][x + 1] >= 4 && board[y + 2][x + 2] == 0) ||
+								(board[y - 1][x - 1] >= 4 && board[y - 2][x - 2] == 0) ||
+								(board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0))
+							{
+								flag = 0;
+							}
+						}
+						else if (oldFlag == 1 && flag == 0 && x == 1 && board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0) {
+							if ((board[y + 1][x - 1] >= 4 && board[y + 2][x - 2] == 0) ||
+								(board[y + 1][x + 1] >= 4 && board[y + 2][x + 2] == 0) ||
+								(board[y - 1][x - 1] >= 4 && board[y - 2][x - 2] == 0) ||
+								(board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0))
+							{
+								flag = 0;
+							}
+						}/*
+						else if (oldFlag == 0 && board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0) {
+							if ((board[y + 1][x - 1] >= 4 && board[y + 2][x - 2] == 0) ||
+								(board[y + 1][x + 1] >= 4 && board[y + 2][x + 2] == 0) ||
+								(board[y - 1][x - 1] >= 4 && board[y - 2][x - 2] == 0) ||
+								(board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0))
+							{
+								flag = 0;
+							}
+						}*/
+
+
+						/*
+						if (x > 1 && x < 6) {
+							if ((board[y + 1][x - 1] <= -4 && board[y + 2][x - 2] == 0) ||
+								(board[y + 1][x + 1] <= -4 && board[y + 2][x + 2] == 0) ||
+								(board[y - 1][x - 1] <= -4 && board[y - 2][x - 2] == 0) ||
+								(board[y - 1][x + 1] <= -4 && board[y - 2][x + 2] == 0))
+							{
+								flag = 0;
+							}
+						}
+						else if (oldFlag == 1 && flag == 0 && x == 1 && board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0) {
+							if ((board[y + 1][x - 1] >= 4 && board[y + 2][x - 2] == 0) ||
+								(board[y + 1][x + 1] >= 4 && board[y + 2][x + 2] == 0) ||
+								(board[y - 1][x - 1] >= 4 && board[y - 2][x - 2] == 0) ||
+								(board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0))
+							{
+								flag = 0;
+							}
+						}
+						else if (oldFlag == 0 && board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0) {
+							if ((board[y + 1][x - 1] >= 4 && board[y + 2][x - 2] == 0) ||
+								(board[y + 1][x + 1] >= 4 && board[y + 2][x + 2] == 0) ||
+								(board[y - 1][x - 1] >= 4 && board[y - 2][x - 2] == 0) ||
+								(board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0))
+							{
+								flag = 0;
+							}
+						}*/
+
+						
+
+
 						
 					}
 					else if (ok == 0)
