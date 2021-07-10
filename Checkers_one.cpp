@@ -1,6 +1,6 @@
 ﻿#include <SFML/Graphics.hpp>
 #include <iostream>
-#include <cmath>
+#include <cmath>//использовал abs(модуль)
 using namespace sf;
 
 #define Size_board 8// Размер поля 8*8
@@ -18,7 +18,7 @@ int  size = 100, move = 0, x, y;
 int regeAlb = 0, regeNegru = 0, flag = 0; // flag - 0 белые, 1 чёрные
 int pawn_hit, pawn_w, pawn_b, help_p;
 int counter_wh = 0, counter_bl = 0;
-
+/*
 //Массив расположения фигур на доске
 int board[8][8] =
 { 0, 6, 0, 6, 0, 6, 0, 6,
@@ -29,18 +29,37 @@ int board[8][8] =
  -6, 0,-6, 0,-6, 0,-6, 0,
   0,-6, 0,-6, 0,-6, 0,-6,
  -6, 0,-6, 0,-6, 0,-6, 0, };
+ */
 
-//Белая дамка
-int White_dam_move(int ox, int oy, int nx, int ny)
-{
+ //Массив расположения фигур на доске
+int board[8][8] =
+{ 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 6, 0, 6, 0,
+  0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 6, 0,
+  0,-6, 0,-6, 0,-6, 0, 0,
+  0, 0, 0, 0, 0, 0, 4, 0,
+  0, 0, 0, 0, 0, 0, 0, 4,
+  0, 0, 0, 0, 0, 0, 0, 0, };
+
+int Hit_the_dam(int ox, int oy, int nx, int ny, int check) {
+
+	//Чёрная ищем белую шашку
+	if (check == 0) {
+		pawn_w = -10;
+		pawn_b = 4;//откат флага
+		
+	}
+	else {//Белая, ищем чёрную шашку
+		pawn_w = -4;
+		pawn_b = 10;//откат флага
+	}
+	
 	//Левый верхний
 	int j = ox - 1;
 	for (int i = oy - 1; i >= 0; i--)
 	{
-		if (board[i][j] >= 0 && (ny >= i-1 && nx >= j-1)) {
-			board[i][j] = 0;
-			return 1;
-		}
+		if ((board[oy - 1][ox - 1] <= pawn_w || board[oy - 1][ox - 1] >= pawn_b) && (ny == i - 1 && nx == j - 1)) { board[i][j] = 0; return 1; }
 		else if (board[i][j] != 0) break;
 		j--;
 	}
@@ -49,80 +68,120 @@ int White_dam_move(int ox, int oy, int nx, int ny)
 	j = ox + 1;
 	for (int i = oy - 1; i >= 0; i--)
 	{
-		if (board[i][j] >= 0 && (ny >= i + 1 && nx >= j - 1)) {
-			board[i][j] = 0;
-			return 1;
-		}
+		if ((board[oy + 1][ox - 1] <= pawn_w || board[oy + 1][ox - 1] >= pawn_b) && (ny == i - 1 && nx == j + 1)) { board[i][j] = 0; return 1; }
 		else if (board[i][j] != 0) break;
 		j++;
 	}
-
 	// Левый нижний
 	j = ox - 1;
 	for (int i = oy + 1; i <= 7; i++)
 	{
-		if (board[i][j] >= 0 && (ny >= i && nx >= j)) { 
-			board[i][j] = 0;
-			return 1; 
-		}
-
+		if ((board[oy + 1][ox - 1] <= pawn_w || board[oy + 1][ox - 1] >= pawn_b) && (ny == i + 1 && nx == j - 1)) { board[i][j] = 0; return 1; }
 		else if (board[i][j] != 0) break;
 		j--;
 	}
-
 	// Правый нижний
 	j = ox + 1;
 	for (int i = oy + 1; i <= 7; i++)
 	{
-		if (board[i][j] >= 0 && (ny == i && nx == j)) {
-			board[i][j] = 0;
-			return 1; 
-		}
+		if ((board[oy + 1][ox - 1] <= pawn_w || board[oy + 1][ox - 1] >= pawn_b) && ((ny == i + 1 && nx == j + 1) || (ny == i + 2 && nx == j + 2) || (ny == i + 3 && nx == j + 3))) { board[i][j] = 0; return 1; }
 		else if (board[i][j] != 0) break;
 		j++;
 	}
 	return 0;
 }
 
+//Белая дамка
+int White_dam_move(int ox, int oy, int nx, int ny)
+{
+	//Битьё шашки
+	pawn_hit = 0;
+	if (Hit_the_dam(ox, oy, nx, ny, pawn_hit) == 1) {
+		return 1;
+	}
+	else {
+		//Левый верхний
+		int j = ox - 1;
+		for (int i = oy - 1; i >= 0; i--)
+		{
+			if (board[i][j] >= 0 && (ny == i && nx == j)) return 1;
+			else if (board[i][j] != 0) break;
+			j--;
+		}
+		// Правый верхний
+		j = ox + 1;
+		for (int i = oy - 1; i >= 0; i--)
+		{
+			if (board[i][j] >= 0 && (ny == i && nx == j)) return 1;
+			else if (board[i][j] != 0) break;
+			j++;
+		}
+		// Левый нижний
+		j = ox - 1;
+		for (int i = oy + 1; i <= 7; i++)
+		{
+			if (board[i][j] >= 0 && (ny == i && nx == j)) return 1;
+			else if (board[i][j] != 0) break;
+			j--;
+		}
+		// Правый нижний
+		j = ox + 1;
+		for (int i = oy + 1; i <= 7; i++)
+		{
+			if (board[i][j] >= 0 && (ny == i && nx == j)) return 1;
+			else if (board[i][j] != 0) break;
+			j++;
+		}
+		return 0;
+	}
+}
+
 //Чёрная дамка
 int Black_dam_move(int ox, int oy, int nx, int ny)
 {
-	//Левый верхний
-	int j = ox - 1;
-	for (int i = oy - 1; i >= 0; i--)
-	{
-		if (board[i][j] <= 0 && (ny == i && nx == j)) return 1;
-		else if (board[i][j] != 0) break;
-		j--;
+	pawn_hit = 1;
+	if (Hit_the_dam(ox, oy, nx, ny, pawn_hit) == 1) {
+		return 1;
 	}
+	else {
 
-	// Правый верхний
-	j = ox + 1;
-	for (int i = oy - 1; i >= 0; i--)
-	{
-		if (board[i][j] <= 0 && (ny == i && nx == j)) return 1;
-		else if (board[i][j] != 0) break;
-		j++;
-	}
+		//Левый верхний
+		int j = ox - 1;
+		for (int i = oy - 1; i >= 0; i--)
+		{
+			if (board[i][j] <= 0 && (ny == i && nx == j)) return 1;
+			else if (board[i][j] != 0) break;
+			j--;
+		}
 
-	// Левый нижний
-	j = ox - 1;
-	for (int i = oy + 1; i <= 7; i++)
-	{
-		if (board[i][j] <= 0 && (ny == i && nx == j)) return 1;
-		else if (board[i][j] != 0) break;
-		j--;
-	}
+		// Правый верхний
+		j = ox + 1;
+		for (int i = oy - 1; i >= 0; i--)
+		{
+			if (board[i][j] <= 0 && (ny == i && nx == j)) return 1;
+			else if (board[i][j] != 0) break;
+			j++;
+		}
 
-	// Правый нижний
-	j = ox + 1;
-	for (int i = oy + 1; i <= 7; i++)
-	{
-		if (board[i][j] <= 0 && (ny == i && nx == j))  return 1;
-		else if (board[i][j] != 0) break;
-		j++;
+		// Левый нижний
+		j = ox - 1;
+		for (int i = oy + 1; i <= 7; i++)
+		{
+			if (board[i][j] <= 0 && (ny == i && nx == j)) return 1;
+			else if (board[i][j] != 0) break;
+			j--;
+		}
+
+		// Правый нижний
+		j = ox + 1;
+		for (int i = oy + 1; i <= 7; i++)
+		{
+			if (board[i][j] <= 0 && (ny == i && nx == j))  return 1;
+			else if (board[i][j] != 0) break;
+			j++;
+		}
+		return 0;
 	}
-	return 0;
 }
 
 //Битьё шашки
@@ -144,12 +203,6 @@ int Hit_the_checker(int ox, int oy, int nx, int ny, int check) {
 			board[oy + 1][ox - 1] >= pawn_b) && board[oy + 2][ox - 2] == 0) {
 	
 		board[oy + 1][ox - 1] = 0;
-		/*
-		if ((oy-1 >= 0 && ox-1>=0 && oy-1 board[oy-1][ox-1]>=4 && board[oy - 2][ox - 2] == 0 &&) {
-
-
-		}
-		*/
 		return 1;
 	}
 
@@ -180,7 +233,6 @@ int Hit_the_checker(int ox, int oy, int nx, int ny, int check) {
 		return 1;
 	}
 	return 0;
-
 }
 
 //Чёрные шашки(как ходят)
@@ -360,7 +412,6 @@ int main()
 								else if (abs(oldPoz.y - y) > 1 && abs(oldPoz.x - x) > 1 && x - 1 >= 0 ) {
 									flag = 0;
 								}
-								
 							}
 
 						}
