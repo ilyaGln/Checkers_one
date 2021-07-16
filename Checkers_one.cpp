@@ -1,6 +1,9 @@
 ﻿#include <SFML/Graphics.hpp>
 #include <iostream>
 #include <cmath>//использовал abs(модуль)
+#include <sstream>
+#include <conio.h>
+#include <iomanip>
 using namespace sf;
 
 #define Size_board 8// Размер поля 8*8
@@ -13,13 +16,15 @@ struct poz
 {
 	int x, y;
 }oldPoz;
-
-int  size = 100, move = 0, x, y;
-int regeAlb = 0, regeNegru = 0, flag = 0; // flag - 0 белые, 1 чёрные
+int count_w = 12, count_b = 12;//счётчики шашек
+int  size = 75, move = 0, x, y;//размер поля, флаг передвижения, координаты
+int flag = 0; // flag - 0 белые, 1 чёрные
 int pawn_hit, pawn_w, pawn_b, help_p;
-int counter_wh = 0, counter_bl = 0;
-/*
+int move_bl_wh=0;
+
+int size_window = 600;
 //Массив расположения фигур на доске
+
 int board[8][8] =
 { 0, 6, 0, 6, 0, 6, 0, 6,
   6, 0, 6, 0, 6, 0, 6, 0,
@@ -29,18 +34,38 @@ int board[8][8] =
  -6, 0,-6, 0,-6, 0,-6, 0,
   0,-6, 0,-6, 0,-6, 0,-6,
  -6, 0,-6, 0,-6, 0,-6, 0, };
- */
+ 
 
+void Check_the_hit(int check) {
+	if (check == 1) {
+		count_b -= 1;
+		std::cout << "Black = " << count_b << std::endl;
+	}
+	else {
+		count_w -= 1;
+		std::cout << "White = " << count_w << std::endl;
+	}
+
+	if (count_b == 0) { 
+		std::cout << "White won!"; 
+		move_bl_wh = 1;
+	}
+	else if(count_w==1) std::cout << "Black won!";
+}
+
+/*
  //Массив расположения фигур на доске
 int board[8][8] =
-{ 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 6, 0, 6, 0,
-  0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 6, 0,
-  0,-6, 0,-6, 0,-6, 0, 0,
-  0, 0, 0, 0, 0, 0, 4, 0,
-  0, 0, 0, 0, 0, 0, 0, 4,
-  0, 0, 0, 0, 0, 0, 0, 0, };
+{ 0, 6, 0, 0, 0, 0, 0, 0,
+  0, 0, 6, 0, 0, 0, -6, 0,
+  0, 0, 0, 0, 0, 0, 0, -6,
+  0, 0, 6, 0, 0, 0, -6, 0,
+  0, 0, 0, 6, 0, 6, 0, 0,
+  0, 0, 0, 0,-6, 0, 0, 0,
+  0, 0, 0, 0, 0,-6, 0, 0,
+  0, 0, 0, 0,-6, 0,-6, 0, };
+  */
+
 
 int Hit_the_dam(int ox, int oy, int nx, int ny, int check) {
 
@@ -59,7 +84,7 @@ int Hit_the_dam(int ox, int oy, int nx, int ny, int check) {
 	int j = ox - 1;
 	for (int i = oy - 1; i >= 0; i--)
 	{
-		if ((board[oy - 1][ox - 1] <= pawn_w || board[oy - 1][ox - 1] >= pawn_b) && (ny == i - 1 && nx == j - 1)) { board[i][j] = 0; return 1; }
+		if ((board[oy - 1][ox - 1] <= pawn_w || board[oy - 1][ox - 1] >= pawn_b) && (ny == i && nx == j)) { board[i][j] = 0; return 1; }
 		else if (board[i][j] != 0) break;
 		j--;
 	}
@@ -149,7 +174,7 @@ int Black_dam_move(int ox, int oy, int nx, int ny)
 		int j = ox - 1;
 		for (int i = oy - 1; i >= 0; i--)
 		{
-			if (board[i][j] <= 0 && (ny == i && nx == j)) return 1;
+			if (board[i][j] <= 0 && (ny == i && nx == j) ) return 1;
 			else if (board[i][j] != 0) break;
 			j--;
 		}
@@ -191,6 +216,7 @@ int Hit_the_checker(int ox, int oy, int nx, int ny, int check) {
 	if (check == 0) {
 		pawn_w = -4;
 		pawn_b = 10;//откат флага
+		
 	}
 	else {//Белая, ищем чёрную шашку
 		pawn_w = -10;
@@ -201,7 +227,9 @@ int Hit_the_checker(int ox, int oy, int nx, int ny, int check) {
 	if (oy + 1 >= 0 && ox - 1 < Size_board && nx == ox - 2 &&
 		ny == oy + 2 && (board[oy + 1][ox - 1] <= pawn_w ||
 			board[oy + 1][ox - 1] >= pawn_b) && board[oy + 2][ox - 2] == 0) {
-	
+		
+		Check_the_hit(check);
+
 		board[oy + 1][ox - 1] = 0;
 		return 1;
 	}
@@ -210,7 +238,7 @@ int Hit_the_checker(int ox, int oy, int nx, int ny, int check) {
 	if (oy + 1 >= 0 && ox + 1 < Size_board && nx == ox + 2 &&
 		ny == oy + 2 && (board[oy + 1][ox + 1] <= pawn_w ||
 			board[oy + 1][ox + 1] >= pawn_b) && board[oy + 2][ox + 2] == 0) {
-
+		Check_the_hit(check);
 		board[oy + 1][ox + 1] = 0;
 		return 1;
 	}
@@ -219,7 +247,7 @@ int Hit_the_checker(int ox, int oy, int nx, int ny, int check) {
 	if (oy - 1 >= 0 && ox + 1 < Size_board && nx == ox + 2 &&
 		ny == oy - 2 && (board[oy - 1][ox + 1] <= pawn_w ||
 			board[oy - 1][ox + 1] >= pawn_b) && board[oy - 2][ox + 2] == 0) {
-
+		Check_the_hit(check);
 		board[oy - 1][ox + 1] = 0;
 		return 1;
 	}
@@ -228,7 +256,7 @@ int Hit_the_checker(int ox, int oy, int nx, int ny, int check) {
 	if (oy - 1 >= 0 && ox - 1 < Size_board && nx == ox - 2 &&
 		ny == oy - 2  && (board[oy - 1][ox - 1] <= pawn_w ||
 			board[oy - 1][ox - 1] >= pawn_b) && board[oy - 2][ox - 2] == 0) {
-
+		Check_the_hit(check);
 		board[oy - 1][ox - 1] = 0;
 		return 1;
 	}
@@ -280,30 +308,84 @@ int White_pawn_m(int ox, int oy, int nx, int ny)
 	}
 }
 int oldFlag = 0;
+
 int main()
 {
-	RenderWindow window(VideoMode(800, 800),
-		L"Шашки", sf::Style::Close | sf::Style::Titlebar);
+	setlocale(LC_ALL, "Russian");
 
+	//Выбор размера окна***************************************************************************************
+	std::cout << "Выберите размер доски:\n1)600*600;\n2)675*675.\n3)800*800(Для больших экранов)\nРазмер:";
+	int a = 0;
+	std::cin >> a;
+	if (a == 1) {
+		size_window = 600; size = 75;
+	}
+	else if (a == 2) {
+		size_window = 675; size = 85;
+	}
+	else { size_window = 800; size = 100; }
+	RenderWindow window(VideoMode(size_window+335, size_window),//600*600 при size = 75, 800*800 при size = 100.
+		L"Шашки");
+	//*********************************************************************************************************
 	//Иконка окна
 	Image icon;
 	if (!icon.loadFromFile("images/icon.png")) return 1;
 	window.setIcon(512, 512, icon.getPixelsPtr());
 
-	Texture t1, t2, t3, t4, t5;
+	Texture t1, t2, t3, t4, t5, t6, t7, t8;
+	
+	Font font;
+	font.loadFromFile("8277.ttf");//загрузка шрифта
+	Text text_w("", font, 32), text_b("", font, 32);
+	Text flag_win("", font, 32);
 
-	//Добавления изображения(доска, шашки)
-	t1.loadFromFile("images/board.png");
-	t2.loadFromFile("images/Black_damka.png");
-	t3.loadFromFile("images/White_damka_bl.png");
-	t4.loadFromFile("images/Black_1.png");//anime edition - 2.png  //classic - Black_1.png // gopnik edition - 4.png
-	t5.loadFromFile("images/White_1.png");//anime edition - 1.png  //classic - White_1.png // gopnik edition - 3.png
+	//Цвет текта 
+	text_w.setFillColor(Color::Black);
+	text_b.setFillColor(Color::Black);
+	flag_win.setFillColor(Color::Black);
+
+	//Жирный текст
+	text_w.setStyle(Text::Bold);
+	text_b.setStyle(Text::Bold);
+	flag_win.setStyle(Text::Bold);
+
+	t6.loadFromFile("images/1234.png");//Таблица счёта
+	if (a == 1) {
+		//Добавления изображения(доска, шашки) при размере окна 600*600 папка images_75
+		t1.loadFromFile("images_75/Board.png");
+		t2.loadFromFile("images_75/Black_damka.png");
+		t3.loadFromFile("images_75/White_damka_bl.png");
+		t4.loadFromFile("images_75/Black_1.png");//anime edition - 2.png  //classic - Black_1.png // gopnik edition - 4.png
+		t5.loadFromFile("images_75/White_1.png");//anime edition - 1.png  //classic - White_1.png // gopnik edition - 3.png
+	}
+	else if(a==2) {
+		t1.loadFromFile("images_84/Board.png");
+		t2.loadFromFile("images_84/Black_damka.png");
+		t3.loadFromFile("images_84/White_damka_bl.png");
+		t4.loadFromFile("images_84/Black_1.png");//anime edition - 2.png  //classic - Black_1.png // gopnik edition - 4.png
+		t5.loadFromFile("images_84/White_1.png");//anime edition - 1.png  //classic - White_1.png // gopnik edition - 3.png
+	}
+	else {
+		t1.loadFromFile("images/Board.png");
+		t2.loadFromFile("images/Black_damka.png");
+		t3.loadFromFile("images/White_damka_bl.png");
+		t4.loadFromFile("images/Black_1.png");//anime edition - 2.png  //classic - Black_1.png // gopnik edition - 4.png
+		t5.loadFromFile("images/White_1.png");//anime edition - 1.png  //classic - White_1.png // gopnik edition - 3.png
+		
+	}
+	t7.loadFromFile("images/White_won.png");//anime edition - 1.png  //classic - White_1.png // gopnik edition - 3.png
+	t8.loadFromFile("images/Black_won.png");//Таблица счёта
+
+
 
 	Sprite tabla(t1);// спрайт доски
 	Sprite Black_dam_spr(t2);// Спрайт чёрной дамки
 	Sprite White_dam_spr(t3);//Спрайт белой дамки
 	Sprite Black_pawn_spr(t4);//Спрайт чёрной пешки
 	Sprite White_pawn_spr(t5);//Спрайт белой пешки
+	Sprite shet(t6);//Спрайт таблицы счёта
+	Sprite White_won1(t7);//Спрайт белой пешки
+	Sprite Black_won1(t8);//Спрайт таблицы счёта
 	Sprite Flag;
 
 	float dx = 0, dy = 0;
@@ -327,8 +409,8 @@ int main()
 				{
 					if (board[y][x] != 0)
 					{
-						dx = pos.x - x * 100;
-						dy = pos.y - y * 100;
+						dx = pos.x - x * size;
+						dy = pos.y - y * size;
 
 						//Чёрная дамка
 						if (board[y][x] == Black_dam && flag == 1)
@@ -373,6 +455,8 @@ int main()
 				if (e.key.code == Mouse::Left)//обработка события - нажатие ЛКМ 
 				{
 					int ok = 2;
+
+					//Если вернёт ok=1 значит ход возможен и будет выполнен
 					if (num_figure == White_dam && move == 1)
 					{
 						ok = White_dam_move(oldPoz.x, oldPoz.y, x, y);
@@ -384,18 +468,15 @@ int main()
 					if (num_figure == Black_pawn && move == 1)
 					{
 						ok = Black_pawn_m(oldPoz.x, oldPoz.y, x, y);
-						if (ok == 1 && regeNegru == 0) regeNegru = 1;
+						
 					}
 					if (num_figure == White_pawn && move == 1)
 					{
 						ok = White_pawn_m(oldPoz.x, oldPoz.y, x, y);
-						if (ok == 1 && regeAlb == 0) regeAlb = 1;
 					}
 					if (ok == 1)
 					{
-						//Если пешки дойдут до конца поля они превращаются в дамки
-
-						
+						//Проверка на битьё
 						if (flag == 0) {
 							flag = 1;
 							if ((board[y + 1][x - 1] >= 4 && board[y + 2][x - 2] == 0) ||
@@ -403,13 +484,13 @@ int main()
 								(board[y - 1][x - 1] >= 4 && board[y - 2][x - 2] == 0) ||
 								(board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] == 0))
 							{
-								if(x==1 && (board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] >= 4)){
+								if (x == 1 && (board[y - 1][x + 1] >= 4 && board[y - 2][x + 2] >= 4)) {
 									flag = 1;
 								}
-								else if (y == 1 && (board[y - 1][x + 1] >= 4 && (board[y - 2][x + 2] >= 4)|| (board[y - 2][x + 2] >= 4))) {
+								else if (y == 1 && (board[y - 1][x + 1] >= 4 && (board[y - 2][x + 2] >= 4) || (board[y - 2][x + 2] >= 4))) {
 									flag = 1;
 								}
-								else if (abs(oldPoz.y - y) > 1 && abs(oldPoz.x - x) > 1 && x - 1 >= 0 ) {
+								else if (abs(oldPoz.y - y) > 1 && abs(oldPoz.x - x) > 1 && x - 1 >= 0) {
 									flag = 0;
 								}
 							}
@@ -428,18 +509,19 @@ int main()
 								else if (y == 6 && (board[y + 1][x - 1] <= -4 && board[y + 2][x - 2] <= -4)) {
 									flag = 0;
 								}
-
-								else if (abs(oldPoz.y - y) > 1 && abs(oldPoz.x - x) > 1 && x - 1 >= 0 && x+1<7) {
+								else if (abs(oldPoz.y - y) > 1 && abs(oldPoz.x - x) > 1 && x - 1 >= 0 && y == 6) {
+									flag = 0;
+								}
+								else if (abs(oldPoz.y - y) > 1 && abs(oldPoz.x - x) > 1 && x - 1 >= 0 && x + 1 < 7) {
 									flag = 1;
 								}
-
 							}
-						
 						}
+						//Если пешки дойдут до конца поля они превращаются в дамки
 						board[y][x] = num_figure;
 						if (y == 0 && num_figure == White_pawn) board[y][x] = White_dam;
 						if (y == 7 && num_figure == Black_pawn) board[y][x] = Black_dam;
-						
+
 						/*
 						oldFlag = 1;
 						if (oldFlag == 1) {
@@ -477,7 +559,7 @@ int main()
 			}
 		}
 
-		window.clear();//очистка
+		window.clear(sf::Color::White);//очистка с белым цыетом
 		window.draw(tabla);//добаялем доску
 
 		if (move == 1)
@@ -490,7 +572,7 @@ int main()
 		{
 			for (int j = 0; j < Size_board; j++)
 			{
-				
+
 				if (board[i][j] != 0)
 				{
 					//Добавляем чёрную дамку
@@ -514,15 +596,68 @@ int main()
 					//Добавляем белую пешку
 					if (board[i][j] == White_pawn)
 					{
-						White_pawn_spr.setPosition(j* size, i* size);
-						window.draw(White_pawn_spr);							
+						White_pawn_spr.setPosition(j * size, i * size);
+						window.draw(White_pawn_spr);
 					}
 				}
 			}
 		}
-			
+	
+		shet.setPosition(size_window+5, 0);
+		window.draw(shet);
+
+		std::ostringstream Score_w, Score_b;//Кол-во белых и чёрных шашек, флаг.
+		Score_w << count_w;
+		Score_b << count_b;
+		
+		//Счётчик белых шашек
+		text_w.setString(L"Белые:" + Score_w.str());
+		text_w.setPosition(size_window + 10, 50);
+		window.draw(text_w);
+
+		//Счётчик чёрных шашек
+		text_b.setString(L"Чёрные:" + Score_b.str());
+		text_b.setPosition(size_window + 175, 50);
+		window.draw(text_b);
+		
+		//Если осталось 0 шашек то проиграли
+		if (count_w == 0) {
+			flag_win.setString(L"Чёрные победили!");
+			flag_win.setPosition(size_window + 40, 145);
+			window.draw(flag_win);
+			Black_won1.setPosition(size_window / 2 - 275, size_window / 2 - 150);//расположение счётчика в окне
+			window.draw(Black_won1);
+			//system("pause");
+			//return 0;
+		}
+		else if (count_b == 0) {
+			flag_win.setString(L"Белые победили!");
+			flag_win.setPosition(size_window + 50, 145);
+			window.draw(flag_win);
+
+			White_won1.setPosition(size_window / 2 - 275, size_window / 2 - 150);//расположение счётчика в окне
+			window.draw(White_won1);
+			//system("pause");
+			//return 0;
+		}
+		else {
+			//Если флаг 0 то ход белых иначе ход чёрных
+			if (flag == 0) {
+				flag_win.setString(L"Белые");
+				flag_win.setPosition(size_window + 130, 145);
+				window.draw(flag_win);
+			}
+			else {
+				flag_win.setString(L"Чёрные");
+				flag_win.setPosition(size_window + 120, 145);
+				window.draw(flag_win);
+			}
+		}
 		window.display();
 	}
+	_getch();
+	system("pause");
+	std::cin.get();
 	
 	return 0;
 }

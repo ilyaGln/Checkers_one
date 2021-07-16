@@ -1,8 +1,17 @@
 ﻿  Checkers_one.cpp
-d:\vs\checkers_one\checkers_one\checkers_one.cpp(330): warning C4244: =: преобразование "int" в "float", возможна потеря данных
-d:\vs\checkers_one\checkers_one\checkers_one.cpp(331): warning C4244: =: преобразование "int" в "float", возможна потеря данных
-d:\vs\checkers_one\checkers_one\checkers_one.cpp(499): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-d:\vs\checkers_one\checkers_one\checkers_one.cpp(505): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-d:\vs\checkers_one\checkers_one\checkers_one.cpp(511): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
-d:\vs\checkers_one\checkers_one\checkers_one.cpp(517): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(412): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(413): warning C4244: =: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(581): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(587): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(593): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(599): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(606): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(615): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(620): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(626): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(628): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(635): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(638): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(647): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
+d:\vs\checkers_one\checkers_one\checkers_one.cpp(652): warning C4244: аргумент: преобразование "int" в "float", возможна потеря данных
   Checkers_one.vcxproj -> D:\VS\Checkers_one\Debug\Checkers_one.exe
